@@ -53,7 +53,7 @@ class AuthenticatedGenreApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
-    def test_put_movie(self):
+    def test_put_genre(self):
         genre = create_sample_genre()
         url = genre_detail_url(genre.id)
         payload = {"name": "brand new"}
@@ -64,7 +64,7 @@ class AuthenticatedGenreApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(genre.name, "brand new")
 
-    def test_patch_movie(self):
+    def test_patch_genre(self):
         genre = create_sample_genre()
         url = genre_detail_url(genre.id)
         payload = {"name": "brand new"}
