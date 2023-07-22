@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from theatre.models import Genre, Actor, Play
+from theatre.models import Genre, Actor, Play, TheatreHall
 
 
 class GenreModelTest(TestCase):
@@ -40,3 +40,18 @@ class PlayModelTest(TestCase):
         play = Play.objects.get(id=1)
 
         self.assertEqual(str(play), play.title)
+
+
+class TheatreHallModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        TheatreHall.objects.create(
+            name="Sample Hall",
+            rows=8,
+            seats_in_row=10,
+        )
+
+    def test_theatre_hall_str_works_correctly(self):
+        theatre_hall = TheatreHall.objects.get(id=1)
+
+        self.assertEqual(str(theatre_hall), "Sample Hall (80)")

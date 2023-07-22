@@ -18,6 +18,7 @@ class ActorViewSet(viewsets.ModelViewSet):
 class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.all()
 
+
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
             return PlayListRetrieveSerializer
