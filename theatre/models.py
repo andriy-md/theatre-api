@@ -1,5 +1,7 @@
 from django.db import models
 
+from user.models import User
+
 
 class Actor(models.Model):
     first_name = models.CharField(max_length=63)
@@ -41,3 +43,8 @@ class TheatreHall(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.capacity})"
+
+
+class Reservation(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
