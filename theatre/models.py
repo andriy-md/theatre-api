@@ -48,3 +48,9 @@ class TheatreHall(models.Model):
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
+
+
+class Performance(models.Model):
+    play = models.ForeignKey(Play, on_delete=models.CASCADE, related_name="performances")
+    theatre_hall = models.ForeignKey(TheatreHall, on_delete=models.CASCADE, )
+    show_time = models.DateTimeField()
