@@ -123,9 +123,9 @@ class TheatreHallModelTest(TestCase):
         self.assertEqual(str(theatre_hall), "Sample Hall (80)")
 
     def test_incorrect_row_count_raises_error(self):
-        th = create_sample_theatre_hall(rows=0)
+        theatre_hall = create_sample_theatre_hall(rows=0)
         with self.assertRaises(ValidationError):
-            th.full_clean()
+            theatre_hall.full_clean()
 
 
 class TicketModelTest(TestCase):
@@ -139,3 +139,7 @@ class TicketModelTest(TestCase):
             str(ticket),
             "Hamlet Sample Hall: row 3 seat 5"
         )
+
+    def test_ticket_seat_in_range_of_theatre_hall(self):
+        with self.assertRaises(ValidationError):
+            create_sample_ticket(seat=32, row=42)
