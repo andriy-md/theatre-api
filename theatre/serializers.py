@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance
+from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance, Ticket
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -55,3 +55,17 @@ class PerformanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Performance
         fields = ["id", "play", "theatre_hall", "show_time"]
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ["id", "row", "seat", "performance", "reservation"]
+
+
+class TicketListRetrieveSerializer(serializers.ModelSerializer):
+    performance = PerformanceListRetrieveSerializer()
+
+    class Meta:
+        model = Ticket
+        fields = ["id", "row", "seat", "performance", "reservation"]
