@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Ticket
@@ -120,6 +121,11 @@ class TheatreHallModelTest(TestCase):
         theatre_hall = TheatreHall.objects.get(id=1)
 
         self.assertEqual(str(theatre_hall), "Sample Hall (80)")
+
+    def test_incorrect_row_count_raises_error(self):
+        th = create_sample_theatre_hall(rows=0)
+        with self.assertRaises(ValidationError):
+            th.full_clean()
 
 
 class TicketModelTest(TestCase):

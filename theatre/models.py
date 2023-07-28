@@ -1,3 +1,5 @@
+from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from user.models import User
@@ -34,8 +36,12 @@ class Play(models.Model):
 
 class TheatreHall(models.Model):
     name = models.CharField(max_length=255)
-    rows = models.IntegerField()
-    seats_in_row = models.IntegerField()
+    rows = models.IntegerField(
+        validators=[validators.MinValueValidator(limit_value=1, message="Theatre Hall must have at least 1 row")]
+    )
+    seats_in_row = models.IntegerField(
+        validators=[validators.MinValueValidator(1, "There must be at least 1 seat in a row")]
+    )
 
     @property
     def capacity(self):
@@ -62,5 +68,29 @@ class Ticket(models.Model):
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE, related_name="tickets")
     reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("seat", "row", "performance"),
+                name="unique_seat_row_performance"
+            )
+        ]
+
     def __str__(self):
         return f"{self.performance.play} {self.performance.theatre_hall.name}: row {self.row} seat {self.seat}"
+
+    def clean(self):
+        if not (1 <= self.row <= self.performance.theatre_hall.rows):
+            raise ValidationError(
+                {"row": f"Row must be in range 1-{self.performance.theatre_hall.rows}"}
+            )
+        if not (1 <= self.seat <= self.performance.theatre_hall.seats_in_row):
+            raise ValidationError(
+                {"seat": f"Seat must be in range 1-{self.performance.theatre_hall.seats_in_row}"}
+            )
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        self.full_clean()
+        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
