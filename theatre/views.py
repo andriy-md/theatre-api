@@ -21,7 +21,7 @@ class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.all().prefetch_related("actors", "genres")
 
     def get_queryset(self):
-        """Search plays"""
+        """Search plays by title and genres"""
         queryset = Play.objects.all().prefetch_related("actors", "genres")
         title = self.request.query_params.get("title")
         genre = self.request.query_params.get("genre")
@@ -29,9 +29,8 @@ class PlayViewSet(viewsets.ModelViewSet):
         if title:
             queryset = queryset.filter(title__icontains=title)
         if genre:
-            searched_genres = genre.split(",")
             q = Q()
-            for searched_genre in searched_genres:
+            for searched_genre in genre.split(","):
                 q |= Q(genres__name__icontains=searched_genre)
             queryset = queryset.filter(q)
 

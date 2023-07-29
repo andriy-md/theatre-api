@@ -9,10 +9,18 @@ from theatre.serializers import PlayListRetrieveSerializer, PlaySerializer
 PLAY_URL = reverse("theatre:play-list")
 
 
+def create_sample_genre(**params):
+    defaults = {
+        "name": "drama"
+    }
+    defaults.update(params)
+    return Genre.objects.create(**defaults)
+
+
 def create_sample_play(**params):
     defaults = {
         "title": "Sample Play",
-        "description": "Best Play Ever"
+        "description": "Best Play Ever",
     }
     defaults.update(params)
     return Play.objects.create(**defaults)
@@ -36,6 +44,36 @@ class AuthenticatedPlayApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+
+    def test_filter_plays_by_title(self):
+        play1 = create_sample_play()
+        create_sample_play()
+        searched_play = create_sample_play(title="The Searched One")
+
+        response = self.client.get(PLAY_URL, {"title": "searched"})
+        serializer_not_searched = PlayListRetrieveSerializer(play1)
+        serializer_searched = PlayListRetrieveSerializer(searched_play)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(serializer_searched.data, response.data)
+        self.assertNotIn(serializer_not_searched, response.data)
+
+    def test_filter_plays_by_genre(self):
+        genre1 = create_sample_genre()
+        genre_searched = create_sample_genre(name="Searched genre")
+        play1 = create_sample_play()
+        play1.genres.add(genre1)
+        create_sample_play()
+        searched_play = create_sample_play()
+        searched_play.genres.add(genre_searched)
+
+        response = self.client.get(PLAY_URL, {"genre": "searched"})
+        serializer_not_searched = PlayListRetrieveSerializer(play1)
+        serializer_searched = PlayListRetrieveSerializer(searched_play)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(serializer_searched.data, response.data)
+        self.assertNotIn(serializer_not_searched.data, response.data)
 
     def test_create_play(self):
         genre = Genre.objects.create(name="Sample genre")
