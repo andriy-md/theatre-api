@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets, views, status
 
 from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance, Ticket
@@ -17,7 +18,24 @@ class ActorViewSet(viewsets.ModelViewSet):
 
 
 class PlayViewSet(viewsets.ModelViewSet):
-    queryset = Play.objects.all()
+    queryset = Play.objects.all().prefetch_related("actors", "genres")
+
+    def get_queryset(self):
+        """Search plays"""
+        queryset = Play.objects.all().prefetch_related("actors", "genres")
+        title = self.request.query_params.get("title")
+        genre = self.request.query_params.get("genre")
+
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+        if genre:
+            searched_genres = genre.split(",")
+            q = Q()
+            for searched_genre in searched_genres:
+                q |= Q(genres__name__icontains=searched_genre)
+            queryset = queryset.filter(q)
+
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
