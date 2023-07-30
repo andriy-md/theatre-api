@@ -66,7 +66,7 @@ class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE, related_name="tickets")
-    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
         constraints = [
@@ -79,15 +79,19 @@ class Ticket(models.Model):
     def __str__(self):
         return f"{self.performance.play} {self.performance.theatre_hall.name}: row {self.row} seat {self.seat}"
 
+    @staticmethod
+    def validate_ticket(row, seat, performance, error_to_raise):
+        if not (1 <= row <= performance.theatre_hall.rows):
+            raise error_to_raise(
+                {"row": f"Row must be in range 1-{performance.theatre_hall.rows}"}
+            )
+        if not (1 <= seat <= performance.theatre_hall.seats_in_row):
+            raise ValidationError(
+                {"seat": f"Seat must be in range 1-{performance.theatre_hall.seats_in_row}"}
+            )
+
     def clean(self):
-        if not (1 <= self.row <= self.performance.theatre_hall.rows):
-            raise ValidationError(
-                {"row": f"Row must be in range 1-{self.performance.theatre_hall.rows}"}
-            )
-        if not (1 <= self.seat <= self.performance.theatre_hall.seats_in_row):
-            raise ValidationError(
-                {"seat": f"Seat must be in range 1-{self.performance.theatre_hall.seats_in_row}"}
-            )
+        Ticket.validate_ticket(self.row, self.seat, self.performance, ValidationError)
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
