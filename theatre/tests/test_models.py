@@ -1,9 +1,10 @@
 from datetime import datetime
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Ticket
+from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Ticket, Reservation
 
 
 def create_sample_genre(**params):
@@ -68,12 +69,19 @@ def create_sample_performance(**params):
     return Performance.objects.create(**defaults)
 
 
-def create_sample_ticket(**params):
+def create_sample_reservation(user):
+    return Reservation.objects.create(
+        user=user
+    )
+
+
+def create_sample_ticket(reservation, **params):
     performance = create_sample_performance()
     defaults = {
         "row": 3,
         "seat": 5,
-        "performance": performance
+        "performance": performance,
+        "reservation": reservation
     }
     defaults.update(params)
     return Ticket.objects.create(**defaults)
@@ -129,9 +137,13 @@ class TheatreHallModelTest(TestCase):
 
 
 class TicketModelTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        create_sample_ticket()
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create(
+            username="test_user",
+            password="qwer1234"
+        )
+        reservation = create_sample_reservation(self.user)
+        create_sample_ticket(reservation)
 
     def test_ticket_str_works_correctly(self):
         ticket = Ticket.objects.get(id=1)
@@ -141,5 +153,6 @@ class TicketModelTest(TestCase):
         )
 
     def test_ticket_seat_in_range_of_theatre_hall(self):
+        reservation = create_sample_reservation(self.user)
         with self.assertRaises(ValidationError):
-            create_sample_ticket(seat=32, row=42)
+            create_sample_ticket(seat=32, row=42, reservation=reservation)
