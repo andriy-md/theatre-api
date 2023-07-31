@@ -1,8 +1,12 @@
 from django.db.models import Q
+from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import GenericViewSet
 
 from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance
+from theatre.permissions import IsAdminOrIfAuthenticatedReadOnly
 from theatre.serializers import GenreSerializer, ActorSerializer, PlaySerializer, PlayListRetrieveSerializer, \
     TheatreHallSerializer, ReservationSerializer, PerformanceSerializer, PerformanceListRetrieveSerializer, \
     ReservationListSerializer
@@ -11,15 +15,19 @@ from theatre.serializers import GenreSerializer, ActorSerializer, PlaySerializer
 class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
 
 class ActorViewSet(viewsets.ModelViewSet):
     serializer_class = ActorSerializer
     queryset = Actor.objects.all()
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
 
 class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.all().prefetch_related("actors", "genres")
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         """Search plays by title and genres"""
@@ -46,11 +54,17 @@ class PlayViewSet(viewsets.ModelViewSet):
 class TheatreHallViewSet(viewsets.ModelViewSet):
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
 
-class ReservationViewSet(viewsets.ModelViewSet):
+class ReservationViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = Reservation.objects.all()
@@ -70,6 +84,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
     serializer_class = PerformanceSerializer
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):

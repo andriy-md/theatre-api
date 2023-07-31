@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -47,9 +48,23 @@ def performance_detail_url(pk: int):
     return reverse("theatre:performance-detail", args=[pk])
 
 
+class UnAuthenticatedPerformanceApiTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+    def test_auth_required(self):
+        response = self.client.get(PERFORMANCE_URL)
+        self.assertEqual(response.status_code, 401)
+
+
 class AuthenticatedPerformanceApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
+        user = get_user_model().objects.create_user(
+            username="test_user",
+            password="qwer1234"
+        )
+        self.client.force_authenticate(user)
 
     def test_list_performance(self):
         create_sample_performance()
@@ -61,6 +76,28 @@ class AuthenticatedPerformanceApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+
+
+    def test_retrieve_performance(self):
+        performance = create_sample_performance()
+        url = performance_detail_url(performance.id)
+
+        response = self.client.get(url)
+        serializer = PerformanceListRetrieveSerializer(performance)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+
+
+class AdminPerformanceApiTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        user = get_user_model().objects.create_user(
+            username="admin_user",
+            password="qwer1234",
+            is_staff=True
+        )
+        self.client.force_authenticate(user)
 
     def test_create_performance(self):
         play1 = create_sample_play()
@@ -74,16 +111,6 @@ class AuthenticatedPerformanceApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Performance.objects.get(play=play1))
-
-    def test_retrieve_performance(self):
-        performance = create_sample_performance()
-        url = performance_detail_url(performance.id)
-
-        response = self.client.get(url)
-        serializer = PerformanceListRetrieveSerializer(performance)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
 
     def test_put_performance(self):
         performance = create_sample_performance()
@@ -125,3 +152,5 @@ class AuthenticatedPerformanceApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(performance.play.title, "Patched Play")
+
+

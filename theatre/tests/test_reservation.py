@@ -48,6 +48,16 @@ def create_sample_performance(**params):
     return Performance.objects.create(**defaults)
 
 
+class AuthenticatedPerformanceApiTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        user = get_user_model().objects.create_user(
+            username="test_user",
+            password="qwer1234"
+        )
+        self.client.force_authenticate(user)
+
+
 class AuthenticatedReservationApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
@@ -67,6 +77,17 @@ class AuthenticatedReservationApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
+
+class AdminPerformanceApiTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            username="admin_user",
+            password="qwer1234",
+            is_staff=True
+        )
+        self.client.force_authenticate(self.user)
+
     def test_create_reservation(self):
         create_sample_performance()
         payload = {
@@ -81,7 +102,7 @@ class AuthenticatedReservationApiTest(TestCase):
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Reservation.objects.get(user__username="user1"))
+        self.assertTrue(Reservation.objects.get(user__username="admin_user"))
 
     def test_raises_error_if_row_out_of_range(self):
         create_sample_performance()
@@ -117,7 +138,7 @@ class AuthenticatedReservationApiTest(TestCase):
 
     def test_raises_error_if_same_seat_for_same_performance(self):
         performance = create_sample_performance()
-        reservation1 = Reservation.objects.create(user=self.user1)
+        reservation1 = Reservation.objects.create(user=self.user)
         Ticket.objects.create(row=3, seat=4, performance=performance, reservation=reservation1)
         payload = {
                 "tickets": [
@@ -132,3 +153,4 @@ class AuthenticatedReservationApiTest(TestCase):
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
