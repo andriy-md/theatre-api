@@ -18,20 +18,13 @@ def reservation_detail_url(pk: int):
 
 
 def create_sample_play(**params):
-    defaults = {
-        "title": "Sample Play",
-        "description": "Best Play Ever"
-    }
+    defaults = {"title": "Sample Play", "description": "Best Play Ever"}
     defaults.update(params)
     return Play.objects.create(**defaults)
 
 
 def create_sample_theatre_hall(**params):
-    defaults = {
-        "name": "Sample Theatre Hall",
-        "rows": 8,
-        "seats_in_row": 10
-    }
+    defaults = {"name": "Sample Theatre Hall", "rows": 8, "seats_in_row": 10}
     defaults.update(params)
     return TheatreHall.objects.create(**defaults)
 
@@ -39,11 +32,7 @@ def create_sample_theatre_hall(**params):
 def create_sample_performance(**params):
     play1 = create_sample_play()
     theatre_hall1 = create_sample_theatre_hall()
-    defaults = {
-        "play": play1,
-        "theatre_hall": theatre_hall1,
-        "show_time": DT
-    }
+    defaults = {"play": play1, "theatre_hall": theatre_hall1, "show_time": DT}
     defaults.update(params)
     return Performance.objects.create(**defaults)
 
@@ -52,8 +41,7 @@ class AuthenticatedPerformanceApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         self.client.force_authenticate(user)
 
@@ -61,9 +49,13 @@ class AuthenticatedPerformanceApiTest(TestCase):
 class AuthenticatedReservationApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
-        self.user1 = get_user_model().objects.create(username="user1", password="qwerty1234")
+        self.user1 = get_user_model().objects.create(
+            username="user1", password="qwerty1234"
+        )
         self.client.force_authenticate(self.user1)
-        self.user2 = get_user_model().objects.create(username="user2", password="qwerty1234")
+        self.user2 = get_user_model().objects.create(
+            username="user2", password="qwerty1234"
+        )
 
     def test_list_reservations(self):
         Reservation.objects.create(user=self.user1)
@@ -82,23 +74,13 @@ class AdminPerformanceApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            username="admin_user",
-            password="qwer1234",
-            is_staff=True
+            username="admin_user", password="qwer1234", is_staff=True
         )
         self.client.force_authenticate(self.user)
 
     def test_create_reservation(self):
         create_sample_performance()
-        payload = {
-            "tickets": [
-                {
-                    "row": 1,
-                    "seat": 2,
-                    "performance": 1
-                }
-            ]
-        }
+        payload = {"tickets": [{"row": 1, "seat": 2, "performance": 1}]}
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -106,15 +88,7 @@ class AdminPerformanceApiTest(TestCase):
 
     def test_raises_error_if_row_out_of_range(self):
         create_sample_performance()
-        payload = {
-                "tickets": [
-                    {
-                        "row": 199,
-                        "seat": 2,
-                        "performance": 1
-                    }
-                ]
-            }
+        payload = {"tickets": [{"row": 199, "seat": 2, "performance": 1}]}
 
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
@@ -122,15 +96,7 @@ class AdminPerformanceApiTest(TestCase):
 
     def test_raises_error_if_seat_out_of_range(self):
         create_sample_performance()
-        payload = {
-                "tickets": [
-                    {
-                        "row": 1,
-                        "seat": 255,
-                        "performance": 1
-                    }
-                ]
-            }
+        payload = {"tickets": [{"row": 1, "seat": 255, "performance": 1}]}
 
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
@@ -139,18 +105,11 @@ class AdminPerformanceApiTest(TestCase):
     def test_raises_error_if_same_seat_for_same_performance(self):
         performance = create_sample_performance()
         reservation1 = Reservation.objects.create(user=self.user)
-        Ticket.objects.create(row=3, seat=4, performance=performance, reservation=reservation1)
-        payload = {
-                "tickets": [
-                    {
-                        "row": 3,
-                        "seat": 4,
-                        "performance": 1
-                    }
-                ]
-            }
+        Ticket.objects.create(
+            row=3, seat=4, performance=performance, reservation=reservation1
+        )
+        payload = {"tickets": [{"row": 3, "seat": 4, "performance": 1}]}
 
         response = self.client.post(RESERVATION_URL, data=payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-

@@ -141,6 +141,6 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Theatre API",
     "DESCRIPTION": "Sell tickets for performances in your theatre",
-    "VERSION": '1.0.0',
+    "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

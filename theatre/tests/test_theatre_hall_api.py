@@ -11,11 +11,7 @@ THEATRE_HALL_URL = reverse("theatre:theatrehall-list")
 
 
 def create_sample_theatre_hall(**params):
-    defaults = {
-        "name": "Sample Theatre Hall",
-        "rows": 8,
-        "seats_in_row": 10
-    }
+    defaults = {"name": "Sample Theatre Hall", "rows": 8, "seats_in_row": 10}
     defaults.update(params)
     return TheatreHall.objects.create(**defaults)
 
@@ -37,8 +33,7 @@ class AuthenticatedTheatreHallApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         self.client.force_authenticate(user)
 
@@ -68,9 +63,7 @@ class AdminTheatreHallApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="admin_user",
-            password="qwer1234",
-            is_staff=True
+            username="admin_user", password="qwer1234", is_staff=True
         )
         self.client.force_authenticate(user)
 

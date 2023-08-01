@@ -11,9 +11,7 @@ PLAY_URL = reverse("theatre:play-list")
 
 
 def create_sample_genre(**params):
-    defaults = {
-        "name": "drama"
-    }
+    defaults = {"name": "drama"}
     defaults.update(params)
     return Genre.objects.create(**defaults)
 
@@ -44,8 +42,7 @@ class AuthenticatedPlayApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         self.client.force_authenticate(user)
 
@@ -105,9 +102,7 @@ class AdminPlayApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="admin_user",
-            password="qwer1234",
-            is_staff=True
+            username="admin_user", password="qwer1234", is_staff=True
         )
         self.client.force_authenticate(user)
 
@@ -118,7 +113,7 @@ class AdminPlayApiTest(TestCase):
             "title": "Interesting test play",
             "description": "You want to visit this",
             "genres": [genre.id],
-            "actors": [actor.id]
+            "actors": [actor.id],
         }
         response = self.client.post(PLAY_URL, data=payload)
 
@@ -134,7 +129,7 @@ class AdminPlayApiTest(TestCase):
             "title": "new play",
             "description": "You want to visit this",
             "genres": [genre.id],
-            "actors": [actor.id]
+            "actors": [actor.id],
         }
 
         response = self.client.put(url, data=payload)
@@ -146,10 +141,7 @@ class AdminPlayApiTest(TestCase):
     def test_patch_play(self):
         play = create_sample_play()
         url = play_detail_url(play.id)
-        payload = {
-            "title": "Patched play",
-            "description": "You want to visit this"
-        }
+        payload = {"title": "Patched play", "description": "You want to visit this"}
 
         response = self.client.patch(url, data=payload)
         play.refresh_from_db()

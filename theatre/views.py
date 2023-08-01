@@ -8,9 +8,17 @@ from rest_framework.viewsets import GenericViewSet
 
 from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance
 from theatre.permissions import IsAdminOrIfAuthenticatedReadOnly
-from theatre.serializers import GenreSerializer, ActorSerializer, PlaySerializer, PlayListRetrieveSerializer, \
-    TheatreHallSerializer, ReservationSerializer, PerformanceSerializer, PerformanceListRetrieveSerializer, \
-    ReservationListSerializer
+from theatre.serializers import (
+    GenreSerializer,
+    ActorSerializer,
+    PlaySerializer,
+    PlayListRetrieveSerializer,
+    TheatreHallSerializer,
+    ReservationSerializer,
+    PerformanceSerializer,
+    PerformanceListRetrieveSerializer,
+    ReservationListSerializer,
+)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -53,15 +61,11 @@ class PlayViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(
-                "title",
-                description="Filter by title",
-                type=str
-            ),
+            OpenApiParameter("title", description="Filter by title", type=str),
             OpenApiParameter(
                 "genre",
                 description="Filter by genre",
-                type={"type": "list", "items": {"type": "str"}}
+                type={"type": "list", "items": {"type": "str"}},
             ),
         ]
     )

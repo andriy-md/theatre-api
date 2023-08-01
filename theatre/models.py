@@ -37,10 +37,16 @@ class Play(models.Model):
 class TheatreHall(models.Model):
     name = models.CharField(max_length=255)
     rows = models.IntegerField(
-        validators=[validators.MinValueValidator(limit_value=1, message="Theatre Hall must have at least 1 row")]
+        validators=[
+            validators.MinValueValidator(
+                limit_value=1, message="Theatre Hall must have at least 1 row"
+            )
+        ]
     )
     seats_in_row = models.IntegerField(
-        validators=[validators.MinValueValidator(1, "There must be at least 1 seat in a row")]
+        validators=[
+            validators.MinValueValidator(1, "There must be at least 1 seat in a row")
+        ]
     )
 
     @property
@@ -53,26 +59,37 @@ class TheatreHall(models.Model):
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="reservations"
+    )
 
 
 class Performance(models.Model):
-    play = models.ForeignKey(Play, on_delete=models.CASCADE, related_name="performances")
-    theatre_hall = models.ForeignKey(TheatreHall, on_delete=models.CASCADE, )
+    play = models.ForeignKey(
+        Play, on_delete=models.CASCADE, related_name="performances"
+    )
+    theatre_hall = models.ForeignKey(
+        TheatreHall,
+        on_delete=models.CASCADE,
+    )
     show_time = models.DateTimeField()
 
 
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
-    performance = models.ForeignKey(Performance, on_delete=models.CASCADE, related_name="tickets")
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="tickets")
+    performance = models.ForeignKey(
+        Performance, on_delete=models.CASCADE, related_name="tickets"
+    )
+    reservation = models.ForeignKey(
+        Reservation, on_delete=models.CASCADE, related_name="tickets"
+    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=("seat", "row", "performance"),
-                name="unique_seat_row_performance"
+                name="unique_seat_row_performance",
             )
         ]
 
@@ -87,7 +104,9 @@ class Ticket(models.Model):
             )
         if not (1 <= seat <= performance.theatre_hall.seats_in_row):
             raise ValidationError(
-                {"seat": f"Seat must be in range 1-{performance.theatre_hall.seats_in_row}"}
+                {
+                    "seat": f"Seat must be in range 1-{performance.theatre_hall.seats_in_row}"
+                }
             )
 
     def clean(self):
@@ -97,4 +116,6 @@ class Ticket(models.Model):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         self.full_clean()
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        super().save(
+            force_insert=False, force_update=False, using=None, update_fields=None
+        )

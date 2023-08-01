@@ -2,7 +2,15 @@ from django.db import transaction
 from rest_framework import serializers, validators
 from rest_framework.exceptions import ValidationError
 
-from theatre.models import Genre, Actor, Play, TheatreHall, Reservation, Performance, Ticket
+from theatre.models import (
+    Genre,
+    Actor,
+    Play,
+    TheatreHall,
+    Reservation,
+    Performance,
+    Ticket,
+)
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -25,7 +33,9 @@ class PlaySerializer(serializers.ModelSerializer):
 
 class PlayListRetrieveSerializer(serializers.ModelSerializer):
     genres = serializers.SlugRelatedField(many=True, slug_field="name", read_only=True)
-    actors = serializers.SlugRelatedField(many=True, slug_field="full_name", read_only=True)
+    actors = serializers.SlugRelatedField(
+        many=True, slug_field="full_name", read_only=True
+    )
 
     class Meta:
         model = Play
@@ -61,17 +71,14 @@ class TicketSerializer(serializers.ModelSerializer):
             validators.UniqueTogetherValidator(
                 queryset=Ticket.objects.all(),
                 fields=("row", "seat", "performance"),
-                message="This seat has already been taken"
+                message="This seat has already been taken",
             )
         ]
 
     def validate(self, attrs):
         data = super().validate(attrs)
         Ticket.validate_ticket(
-            attrs["row"],
-            attrs["seat"],
-            attrs["performance"],
-            ValidationError
+            attrs["row"], attrs["seat"], attrs["performance"], ValidationError
         )
         return data
 

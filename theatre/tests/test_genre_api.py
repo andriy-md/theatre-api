@@ -11,9 +11,7 @@ GENRE_URL = reverse("theatre:genre-list")
 
 
 def create_sample_genre(**params):
-    defaults = {
-        "name": "Sample Genre"
-    }
+    defaults = {"name": "Sample Genre"}
     defaults.update(params)
     return Genre.objects.create(**defaults)
 
@@ -35,8 +33,7 @@ class AuthenticatedGenreApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         self.client.force_authenticate(user)
 
@@ -66,9 +63,7 @@ class AdminGenreApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="admin_user",
-            password="qwer1234",
-            is_staff=True
+            username="admin_user", password="qwer1234", is_staff=True
         )
         self.client.force_authenticate(user)
 

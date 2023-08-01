@@ -4,32 +4,32 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Ticket, Reservation
+from theatre.models import (
+    Genre,
+    Actor,
+    Play,
+    TheatreHall,
+    Performance,
+    Ticket,
+    Reservation,
+)
 
 
 def create_sample_genre(**params):
-    defaults = {
-        "name": "drama"
-    }
+    defaults = {"name": "drama"}
     defaults.update(params)
     return Genre.objects.create(**defaults)
 
 
 def create_sample_actor(**params):
-    defaults = {
-        "first_name": "Adam",
-        "last_name": "Sandler"
-    }
+    defaults = {"first_name": "Adam", "last_name": "Sandler"}
     defaults.update(params)
     return Actor.objects.create(**defaults)
 
 
 def create_sample_play(**params):
     actor1 = create_sample_actor()
-    actor2 = create_sample_actor(
-        first_name="Ben",
-        last_name="Smith"
-    )
+    actor2 = create_sample_actor(first_name="Ben", last_name="Smith")
     genre1 = create_sample_genre()
     defaults = {
         "title": "Hamlet",
@@ -45,11 +45,7 @@ def create_sample_play(**params):
 
 
 def create_sample_theatre_hall(**params):
-    defaults = {
-        "name": "Sample Hall",
-        "rows": 8,
-        "seats_in_row": 10
-    }
+    defaults = {"name": "Sample Hall", "rows": 8, "seats_in_row": 10}
     defaults.update(params)
     return TheatreHall.objects.create(**defaults)
 
@@ -59,20 +55,14 @@ def create_sample_performance(**params):
     theatre_hall = create_sample_theatre_hall()
     dt = datetime.strptime("2023-08-01 19:00", "%Y-%m-%d %H:%M")
 
-    defaults = {
-        "play": play,
-        "theatre_hall": theatre_hall,
-        "show_time": dt
-    }
+    defaults = {"play": play, "theatre_hall": theatre_hall, "show_time": dt}
     defaults.update(params)
 
     return Performance.objects.create(**defaults)
 
 
 def create_sample_reservation(user):
-    return Reservation.objects.create(
-        user=user
-    )
+    return Reservation.objects.create(user=user)
 
 
 def create_sample_ticket(reservation, **params):
@@ -81,7 +71,7 @@ def create_sample_ticket(reservation, **params):
         "row": 3,
         "seat": 5,
         "performance": performance,
-        "reservation": reservation
+        "reservation": reservation,
     }
     defaults.update(params)
     return Ticket.objects.create(**defaults)
@@ -139,18 +129,14 @@ class TheatreHallModelTest(TestCase):
 class TicketModelTest(TestCase):
     def setUp(self) -> None:
         self.user = get_user_model().objects.create(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         reservation = create_sample_reservation(self.user)
         create_sample_ticket(reservation)
 
     def test_ticket_str_works_correctly(self):
         ticket = Ticket.objects.get(id=1)
-        self.assertEqual(
-            str(ticket),
-            "Hamlet Sample Hall: row 3 seat 5"
-        )
+        self.assertEqual(str(ticket), "Hamlet Sample Hall: row 3 seat 5")
 
     def test_ticket_seat_in_range_of_theatre_hall(self):
         reservation = create_sample_reservation(self.user)

@@ -14,20 +14,13 @@ DT = datetime.strptime("2023-08-01 19:00", "%Y-%m-%d %H:%M")
 
 
 def create_sample_play(**params):
-    defaults = {
-        "title": "Sample Play",
-        "description": "Best Play Ever"
-    }
+    defaults = {"title": "Sample Play", "description": "Best Play Ever"}
     defaults.update(params)
     return Play.objects.create(**defaults)
 
 
 def create_sample_theatre_hall(**params):
-    defaults = {
-        "name": "Sample Theatre Hall",
-        "rows": 8,
-        "seats_in_row": 10
-    }
+    defaults = {"name": "Sample Theatre Hall", "rows": 8, "seats_in_row": 10}
     defaults.update(params)
     return TheatreHall.objects.create(**defaults)
 
@@ -35,11 +28,7 @@ def create_sample_theatre_hall(**params):
 def create_sample_performance(**params):
     play1 = create_sample_play()
     theatre_hall1 = create_sample_theatre_hall()
-    defaults = {
-        "play": play1,
-        "theatre_hall": theatre_hall1,
-        "show_time": DT
-    }
+    defaults = {"play": play1, "theatre_hall": theatre_hall1, "show_time": DT}
     defaults.update(params)
     return Performance.objects.create(**defaults)
 
@@ -61,8 +50,7 @@ class AuthenticatedPerformanceApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="test_user",
-            password="qwer1234"
+            username="test_user", password="qwer1234"
         )
         self.client.force_authenticate(user)
 
@@ -76,7 +64,6 @@ class AuthenticatedPerformanceApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
-
 
     def test_retrieve_performance(self):
         performance = create_sample_performance()
@@ -93,9 +80,7 @@ class AdminPerformanceApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         user = get_user_model().objects.create_user(
-            username="admin_user",
-            password="qwer1234",
-            is_staff=True
+            username="admin_user", password="qwer1234", is_staff=True
         )
         self.client.force_authenticate(user)
 
@@ -115,20 +100,11 @@ class AdminPerformanceApiTest(TestCase):
     def test_put_performance(self):
         performance = create_sample_performance()
         url = performance_detail_url(performance.id)
-        play2 = create_sample_play(
-            title="New Play",
-            description="New Pla description"
-        )
+        play2 = create_sample_play(title="New Play", description="New Pla description")
         theatre_hall2 = create_sample_theatre_hall(
-            name="New Theatre Hall",
-            rows=8,
-            seats_in_row=10
+            name="New Theatre Hall", rows=8, seats_in_row=10
         )
-        payload = {
-            "play": play2.id,
-            "theatre_hall": theatre_hall2.id,
-            "show_time": DT
-        }
+        payload = {"play": play2.id, "theatre_hall": theatre_hall2.id, "show_time": DT}
 
         response = self.client.put(url, data=payload)
         performance.refresh_from_db()
@@ -139,8 +115,7 @@ class AdminPerformanceApiTest(TestCase):
     def test_patch_play(self):
         performance = create_sample_performance()
         play2 = create_sample_play(
-            title="Patched Play",
-            description="New Pla description"
+            title="Patched Play", description="New Pla description"
         )
         url = performance_detail_url(performance.id)
         payload = {
@@ -152,5 +127,3 @@ class AdminPerformanceApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(performance.play.title, "Patched Play")
-
-
