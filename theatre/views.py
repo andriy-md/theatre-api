@@ -1,4 +1,5 @@
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -49,6 +50,23 @@ class PlayViewSet(viewsets.ModelViewSet):
         if self.action in ("list", "retrieve"):
             return PlayListRetrieveSerializer
         return PlaySerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "title",
+                description="Filter by title",
+                type=str
+            ),
+            OpenApiParameter(
+                "genre",
+                description="Filter by genre",
+                type={"type": "list", "items": {"type": "str"}}
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class TheatreHallViewSet(viewsets.ModelViewSet):
